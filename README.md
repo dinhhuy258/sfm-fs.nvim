@@ -6,7 +6,7 @@ The `sfm-fm` extension is a plugin for the [sfm](https://github.com/dinhhuy258/s
 
 Here is a short demonstration of the `sfm-fs` extension in action:
 
-TODO: Update video
+https://user-images.githubusercontent.com/17776979/213240383-77a32c60-cf7c-433f-8171-5203773a4a92.mp4
 
 ## Installation
 
