@@ -118,7 +118,7 @@ end
 --- delete selected files/directories
 function M.delete_selections()
 	local selections = ctx.get_selections()
-	if vim.tbl_count(selections) then
+	if vim.tbl_isempty(selections) then
 		log.warn("No files selected. Please select at least one file to proceed.")
 
 		return
@@ -167,7 +167,7 @@ end
 ---@param paths table
 ---@param action_fn function
 local function _paste(paths, action_fn)
-	local dest_entry = M.renderer:get_current_entry()
+	local dest_entry = api.entry.current()
 	if not dest_entry.is_dir or not dest_entry.is_open then
 		dest_entry = dest_entry.parent
 	end
@@ -232,7 +232,7 @@ end
 --- copy selected files/directories to a current opened entry or it's parent
 function M.copy_selections()
 	local selections = ctx.get_selections()
-	if vim.tbl_count(selections) then
+	if vim.tbl_isempty(selections) then
 		log.warn("No files selected. Please select at least one file to proceed.")
 
 		return
@@ -252,7 +252,7 @@ end
 --- move selected files/directories to a current opened entry or it's parent
 function M.move_selections()
 	local selections = ctx.get_selections()
-	if vim.tbl_count(selections) then
+	if vim.tbl_isempty(selections) then
 		log.warn("No files selected. Please select at least one file to proceed.")
 
 		return

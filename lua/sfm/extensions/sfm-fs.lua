@@ -38,8 +38,8 @@ function M.setup(sfm_explorer, opts)
 		end
 	end)
 
-  -- indent(10), indicator(20), icon(30), selection(31), name(40)
-  sfm_explorer:register_renderer("sfm-fs-selection", 39, selection_renderer.render_selection)
+	-- indent(10), indicator(20), icon(30), selection(31), name(40)
+	sfm_explorer:register_renderer("sfm-fs-selection", 39, selection_renderer.render_selection)
 end
 
 return M
