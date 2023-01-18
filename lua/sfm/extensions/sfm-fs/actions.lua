@@ -35,7 +35,7 @@ end
 --- add a file; leaving a trailing `/` will add a directory
 function M.create()
 	local entry = api.entry.current()
-	if (not entry.is_dir or not entry.is_open) and not entry.is_root then
+	if (not entry.is_dir or not api.entry.is_open(entry)) and not entry.is_root then
 		entry = entry.parent
 	end
 
@@ -168,7 +168,7 @@ end
 ---@param action_fn function
 local function _paste(paths, action_fn)
 	local dest_entry = api.entry.current()
-	if not dest_entry.is_dir or not dest_entry.is_open then
+	if not dest_entry.is_dir or not api.entry.is_open(dest_entry) then
 		dest_entry = dest_entry.parent
 	end
 
