@@ -10,7 +10,7 @@ local M = {}
 
 --- delete a file/directory
 function M.delete()
-	local entry = M.renderer:get_current_entry()
+	local entry = api.entry.current()
 	input.confirm("Are you sure you want to delete file " .. entry.name .. "? (y/n)", function()
 		-- on yes
 		input.clear()
@@ -34,8 +34,8 @@ end
 
 --- add a file; leaving a trailing `/` will add a directory
 function M.create()
-	local entry = M.renderer:get_current_entry()
-	if (not entry.is_dir or not M.ctx:is_open(entry)) and not entry.is_root then
+	local entry = api.entry.current()
+	if (not entry.is_dir or not entry.is_open) and not entry.is_root then
 		entry = entry.parent
 	end
 
@@ -168,7 +168,7 @@ end
 ---@param action_fn function
 local function _paste(paths, action_fn)
 	local dest_entry = M.renderer:get_current_entry()
-	if not dest_entry.is_dir or not M.ctx:is_open(dest_entry) then
+	if not dest_entry.is_dir or not dest_entry.is_open then
 		dest_entry = dest_entry.parent
 	end
 

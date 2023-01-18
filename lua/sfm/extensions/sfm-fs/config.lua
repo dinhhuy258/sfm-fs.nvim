@@ -34,6 +34,9 @@ local default_mappings = {
 }
 
 local default_config = {
+	icons = {
+		selection = "",
+	},
 	mappings = {
 		custom_only = false,
 		list = {
