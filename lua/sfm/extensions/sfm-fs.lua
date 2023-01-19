@@ -3,6 +3,7 @@ local event = require("sfm.event")
 local config = require("sfm.extensions.sfm-fs.config")
 local colors = require("sfm.extensions.sfm-fs.colors")
 local selection_renderer = require("sfm.extensions.sfm-fs.selection_renderer")
+local ctx = require("sfm.extensions.sfm-fs.context")
 
 local M = {}
 
@@ -15,6 +16,10 @@ function M.setup(sfm_explorer, opts)
 			colors.setup()
 		end,
 	})
+
+	sfm_explorer:subscribe(event.ExplorerRootChanged, function()
+		ctx.clear_selections()
+	end)
 
 	sfm_explorer:subscribe(event.ExplorerOpened, function(payload)
 		local bufnr = payload["bufnr"]
