@@ -1,12 +1,20 @@
 local event = require("sfm.event")
 
 local config = require("sfm.extensions.sfm-fs.config")
+local colors = require("sfm.extensions.sfm-fs.colors")
 local selection_renderer = require("sfm.extensions.sfm-fs.selection_renderer")
 
 local M = {}
 
 function M.setup(sfm_explorer, opts)
 	config.setup(opts)
+	colors.setup()
+
+	vim.api.nvim_create_autocmd("ColorScheme", {
+		callback = function()
+			colors.setup()
+		end,
+	})
 
 	sfm_explorer:subscribe(event.ExplorerOpened, function(payload)
 		local bufnr = payload["bufnr"]

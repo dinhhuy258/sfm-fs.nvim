@@ -25,6 +25,19 @@ To install the `sfm-fs` extension, you will need to have the [sfm](https://githu
 }
 ```
 
+## Functionalities
+
+The `sfm-fs` extension provides the following functionalities:
+
+- Create new file/directory
+- Delete current file
+- Rename current file
+- Toggle selection of current entry
+- Clear all selections
+- Copy all selections to the current folder
+- Move all selections to the current folder
+- Delete all selections to the current folder
+
 ## Configuration
 
 The `sfm-fs` plugin provides the following configuration options:
@@ -55,4 +68,23 @@ sfm_explorer:load_extension("sfm-fs", {
 
 ## Mappings
 
-The default mapping is configurated [here](https://github.com/dinhhuy258/sfm-fs.nvim/blob/master/lua/sfm/extensions/sfm-fs/config.lua). You can override the default mapping by setting it via the `mappings` configuration. It's similar to the way [nvim-tree](https://github.com/nvim-tree/nvim-tree.lua) handles mapping overrides.
+To use the functionalities provided by the `sfm-fs` extension, you can use the following key bindings:
+
+| Key     | Action            | Description                                                  |
+| ------- | ----------------- | ------------------------------------------------------------ |
+| n       | create            | Create a new file/directory in the current folder            |
+| dd      | delete            | Delete the current file or directory                         |
+| r       | rename            | Rename the current file or directory                         |
+| space   | toggle_selection  | Toggle the selection of the current file or directory        |
+| c-space | clear_selections  | Clear all selections                                         |
+| p       | copy_selections   | Copy all selected files or directories to the current folder |
+| x       | move_selections   | Move all selected files or directories to the current folder |
+| ds      | delete_selections | Delete all selected files or directories                     |
+
+You can customize these key bindings by setting them via the `mappings` configuration. It's similar to the way [nvim-tree](https://github.com/nvim-tree/nvim-tree.lua) handles mapping overrides.
+
+## Highlighting
+
+The following highlight values are used in the `sfm-fs` extension:
+
+- `SFMSelection`: This highlight value is used to highlight the selection indicator of selected entries. The default color scheme for this highlight value is `blue`.
