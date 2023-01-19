@@ -1,7 +1,6 @@
 local api = require("sfm.api")
 
 local ctx = require("sfm.extensions.sfm-fs.context")
-local path = require("sfm.utils.path")
 local input = require("sfm.extensions.sfm-fs.utils.input")
 local fs = require("sfm.extensions.sfm-fs.utils.fs")
 local log = require("sfm.extensions.sfm-fs.utils.log")
@@ -39,22 +38,22 @@ function M.create()
 		entry = entry.parent
 	end
 
-	input.prompt("Create file " .. path.add_trailing(entry.path), nil, "file", function(name)
+	input.prompt("Create file " .. api.path.add_trailing(entry.path), nil, "file", function(name)
 		input.clear()
 		if name == nil or name == "" then
 			return
 		end
 
-		local fpath = path.join({ entry.path, name })
+		local fpath = api.path.join({ entry.path, name })
 
-		if path.exists(fpath) then
+		if api.path.exists(fpath) then
 			log.warn(fpath .. " already exists")
 
 			return
 		end
 
 		local ok = true
-		if path.has_trailing(name) then
+		if api.path.has_trailing(name) then
 			-- create directory
 			ok = fs.create_dir(fpath)
 		else
@@ -86,15 +85,15 @@ function M.rename()
 
 	local parent = entry.parent
 
-	input.prompt("Rename to " .. path.add_trailing(parent.path), path.basename(from_path), "dir", function(name)
+	input.prompt("Rename to " .. api.path.add_trailing(parent.path), api.path.basename(from_path), "dir", function(name)
 		input.clear()
 		if name == nil or name == "" then
 			return
 		end
 
-		local to_path = path.join({ parent.path, name })
+		local to_path = api.path.join({ parent.path, name })
 
-		if path.exists(to_path) then
+		if api.path.exists(to_path) then
 			log.warn(to_path .. " already exists")
 
 			return
@@ -107,10 +106,14 @@ function M.rename()
 			api.navigation.focus(to_path)
 
 			log.info(
-				string.format("Renaming file %s ➜ %s complete", path.basename(from_path), path.basename(to_path))
+				string.format(
+					"Renaming file %s ➜ %s complete",
+					api.path.basename(from_path),
+					api.path.basename(to_path)
+				)
 			)
 		else
-			log.error(string.format("Renaming file %s failed due to an error", path.basename(from_path)))
+			log.error(string.format("Renaming file %s failed due to an error", api.path.basename(from_path)))
 		end
 	end)
 end
@@ -132,7 +135,7 @@ function M.delete_selections()
 		for fpath, _ in pairs(selections) do
 			table.insert(paths, fpath)
 		end
-		paths = path.unify(paths)
+		paths = api.path.unify(paths)
 
 		local success_count = 0
 		for _, fpath in ipairs(paths) do
@@ -176,22 +179,22 @@ local function _paste(paths, action_fn)
 	local continue_processing = true
 
 	for _, fpath in ipairs(paths) do
-		local basename = path.basename(fpath)
-		local dest_path = path.join({ dest_entry.path, basename })
+		local basename = api.path.basename(fpath)
+		local dest_path = api.path.join({ dest_entry.path, basename })
 
-		if path.exists(dest_path) then
+		if api.path.exists(dest_path) then
 			input.confirm(dest_path .. " already exists. Rename it? (y/n)", function()
 				-- on yes
 				input.clear()
-				input.prompt("New name " .. path.add_trailing(dest_entry.path), basename, "file", function(name)
+				input.prompt("New name " .. api.path.add_trailing(dest_entry.path), basename, "file", function(name)
 					input.clear()
 					if name == nil or name == "" then
 						return
 					end
 
-					dest_path = path.join({ dest_entry.path, name })
+					dest_path = api.path.join({ dest_entry.path, name })
 
-					if path.exists(dest_path) then
+					if api.path.exists(dest_path) then
 						log.warn(dest_path .. " already exists")
 
 						return
@@ -262,7 +265,7 @@ function M.move_selections()
 	for fpath, _ in pairs(selections) do
 		table.insert(paths, fpath)
 	end
-	paths = path.unify(paths)
+	paths = api.path.unify(paths)
 
 	_paste(paths, fs.move)
 

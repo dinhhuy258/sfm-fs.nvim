@@ -1,4 +1,4 @@
-local path = require("sfm.utils.path")
+local api = require("sfm.api")
 
 local M = {}
 
@@ -26,7 +26,7 @@ function M.scandir(fpath)
 		end
 
 		for name in iterator do
-			local absolute_path = path.join({ fpath, name })
+			local absolute_path = api.path.join({ fpath, name })
 			table.insert(paths, absolute_path)
 		end
 	end
@@ -44,13 +44,13 @@ function M._rmdir(fpath)
 end
 
 function M.remove(fpath)
-	if not path.exists(fpath) then
+	if not api.path.exists(fpath) then
 		return false
 	end
 
-	if path.isdir(fpath) then
+	if api.path.isdir(fpath) then
 		return M._rmdir(fpath)
-	elseif path.isfile(fpath) or path.islink(fpath) then
+	elseif api.path.isfile(fpath) or api.path.islink(fpath) then
 		return vim.loop.fs_unlink(fpath)
 	else
 		-- not recognize the file type
@@ -63,7 +63,7 @@ function M.rename(from_path, to_path)
 end
 
 function M.copy(source_path, dest_path)
-	if not path.exists(source_path) then
+	if not api.path.exists(source_path) then
 		return false
 	end
 
@@ -74,9 +74,9 @@ function M.copy(source_path, dest_path)
 
 	local source_lstat = vim.loop.fs_lstat(source_path)
 
-	if path.isfile(source_path) then
+	if api.path.isfile(source_path) then
 		return vim.loop.fs_copyfile(source_path, dest_path)
-	elseif path.isdir(source_path) then
+	elseif api.path.isdir(source_path) then
 		local handle = vim.loop.fs_scandir(source_path)
 		if type(handle) == "string" then
 			return false
@@ -95,7 +95,7 @@ function M.copy(source_path, dest_path)
 				break
 			end
 
-			success = M.copy(path.join({ source_path, name }), path.join({ dest_path, name }))
+			success = M.copy(api.path.join({ source_path, name }), api.path.join({ dest_path, name }))
 			if not success then
 				return false
 			end
@@ -108,7 +108,7 @@ function M.copy(source_path, dest_path)
 end
 
 function M.move(source_path, dest_path)
-	if not path.exists(source_path) then
+	if not api.path.exists(source_path) then
 		return false
 	end
 
