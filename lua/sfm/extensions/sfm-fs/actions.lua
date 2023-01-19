@@ -3,7 +3,6 @@ local api = require("sfm.api")
 local ctx = require("sfm.extensions.sfm-fs.context")
 local input = require("sfm.extensions.sfm-fs.utils.input")
 local fs = require("sfm.extensions.sfm-fs.utils.fs")
-local log = require("sfm.extensions.sfm-fs.utils.log")
 
 local M = {}
 
@@ -15,9 +14,9 @@ function M.delete()
 		input.clear()
 
 		if fs.remove(entry.path) then
-			log.info(entry.path .. " has been deleted")
+			api.log.info(entry.path .. " has been deleted")
 		else
-			log.error("Deletion of file " .. entry.name .. " failed due to an error.")
+			api.log.error("Deletion of file " .. entry.name .. " failed due to an error.")
 		end
 
 		-- reload the explorer
@@ -47,7 +46,7 @@ function M.create()
 		local fpath = api.path.join({ entry.path, name })
 
 		if api.path.exists(fpath) then
-			log.warn(fpath .. " already exists")
+			api.log.warn(fpath .. " already exists")
 
 			return
 		end
@@ -67,9 +66,9 @@ function M.create()
 			-- focus file
 			api.navigation.focus(fpath)
 
-			log.info(fpath .. " created")
+			api.log.info(fpath .. " created")
 		else
-			log.error("Creation of file " .. fpath .. " failed due to an error.")
+			api.log.error("Creation of file " .. fpath .. " failed due to an error.")
 		end
 	end)
 end
@@ -94,7 +93,7 @@ function M.rename()
 		local to_path = api.path.join({ parent.path, name })
 
 		if api.path.exists(to_path) then
-			log.warn(to_path .. " already exists")
+			api.log.warn(to_path .. " already exists")
 
 			return
 		end
@@ -105,7 +104,7 @@ function M.rename()
 			-- focus file
 			api.navigation.focus(to_path)
 
-			log.info(
+			api.log.info(
 				string.format(
 					"Renaming file %s ➜ %s complete",
 					api.path.basename(from_path),
@@ -113,7 +112,7 @@ function M.rename()
 				)
 			)
 		else
-			log.error(string.format("Renaming file %s failed due to an error", api.path.basename(from_path)))
+			api.log.error(string.format("Renaming file %s failed due to an error", api.path.basename(from_path)))
 		end
 	end)
 end
@@ -122,7 +121,7 @@ end
 function M.delete_selections()
 	local selections = ctx.get_selections()
 	if vim.tbl_isempty(selections) then
-		log.warn("No files selected. Please select at least one file to proceed.")
+		api.log.warn("No files selected. Please select at least one file to proceed.")
 
 		return
 	end
@@ -144,7 +143,7 @@ function M.delete_selections()
 			end
 		end
 
-		log.info(
+		api.log.info(
 			string.format(
 				"Deletion process complete. %d files deleted successfully, %d files failed.",
 				success_count,
@@ -195,7 +194,7 @@ local function _paste(paths, action_fn)
 					dest_path = api.path.join({ dest_entry.path, name })
 
 					if api.path.exists(dest_path) then
-						log.warn(dest_path .. " already exists")
+						api.log.warn(dest_path .. " already exists")
 
 						return
 					end
@@ -223,7 +222,7 @@ local function _paste(paths, action_fn)
 		end
 	end
 
-	log.info(
+	api.log.info(
 		string.format(
 			"Copy/move process complete. %d files copied/moved successfully, %d files failed.",
 			success_count,
@@ -236,7 +235,7 @@ end
 function M.copy_selections()
 	local selections = ctx.get_selections()
 	if vim.tbl_isempty(selections) then
-		log.warn("No files selected. Please select at least one file to proceed.")
+		api.log.warn("No files selected. Please select at least one file to proceed.")
 
 		return
 	end
@@ -256,7 +255,7 @@ end
 function M.move_selections()
 	local selections = ctx.get_selections()
 	if vim.tbl_isempty(selections) then
-		log.warn("No files selected. Please select at least one file to proceed.")
+		api.log.warn("No files selected. Please select at least one file to proceed.")
 
 		return
 	end
