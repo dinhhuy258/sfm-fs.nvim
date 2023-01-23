@@ -186,8 +186,6 @@ function M.rename()
 	api.log.warn(
 		"The action rename() is deprecated and will be removed in a future version. Please use the new action move() instead."
 	)
-
-	return M.move()
 end
 
 --- move/rename a current file/directory
