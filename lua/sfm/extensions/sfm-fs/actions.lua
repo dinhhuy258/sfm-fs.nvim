@@ -37,13 +37,11 @@ function M.create()
 		entry = entry.parent
 	end
 
-	input.prompt("Create file " .. api.path.add_trailing(entry.path), nil, "file", function(name)
+	input.prompt("Create file ", api.path.add_trailing(entry.path), "file", function(fpath)
 		input.clear()
-		if name == nil or name == "" then
+		if fpath == nil or fpath == "" then
 			return
 		end
-
-		local fpath = api.path.join({ entry.path, name })
 
 		if api.path.exists(fpath) then
 			api.log.warn(fpath .. " already exists")
@@ -52,7 +50,7 @@ function M.create()
 		end
 
 		local ok = true
-		if api.path.has_trailing(name) then
+		if api.path.has_trailing(fpath) then
 			-- create directory
 			ok = fs.mkdir(fpath)
 		else
