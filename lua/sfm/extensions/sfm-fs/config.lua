@@ -20,10 +20,6 @@ local default_mappings = {
 		action = "copy_selections",
 	},
 	{
-		key = "m",
-		action = "move",
-	},
-	{
 		key = "x",
 		action = "move_selections",
 	},

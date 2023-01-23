@@ -25,19 +25,6 @@ To install the `sfm-fs` extension, you will need to have the [sfm](https://githu
 }
 ```
 
-## Functionalities
-
-The `sfm-fs` extension provides the following functionalities:
-
-- Create new file/directory
-- Delete current file
-- Rename current file
-- Toggle selection of current entry
-- Clear all selections
-- Copy all selections to the current folder
-- Move all selections to the current folder
-- Delete all selections to the current folder
-
 ## Configuration
 
 The `sfm-fs` plugin provides the following configuration options:
@@ -73,15 +60,14 @@ To use the functionalities provided by the `sfm-fs` extension, you can use the f
 | Key     | Action            | Description                                                                    |
 | ------- | ----------------- | ------------------------------------------------------------------------------ |
 | n       | create            | Create a new file/directory in the current folder                              |
-| dd      | delete            | Delete the current file or directory                                           |
-| r       | rename            | Rename the current file or directory                                           |
-| space   | toggle_selection  | Toggle the selection of the current file or directory                          |
-| c-space | clear_selections  | Clear all selections                                                           |
 | c       | copy              | Copy the current file or directory to a destination path specified by the user |
 | p       | copy_selections   | Copy all selected files or directories to the current folder                   |
-| m       | move              | Move the current file or directory to a destination path specified by the user |
+| r       | rename            | Rename the current file or directory                                           |
 | x       | move_selections   | Move all selected files or directories to the current folder                   |
+| dd      | delete            | Delete the current file or directory                                           |
 | ds      | delete_selections | Delete all selected files or directories                                       |
+| space   | toggle_selection  | Toggle the selection of the current file or directory                          |
+| c-space | clear_selections  | Clear all selections                                                           |
 
 You can customize these key bindings by setting them via the `mappings` configuration. It's similar to the way [nvim-tree](https://github.com/nvim-tree/nvim-tree.lua) handles mapping overrides.
 

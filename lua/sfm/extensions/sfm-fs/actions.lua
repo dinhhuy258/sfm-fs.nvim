@@ -82,15 +82,11 @@ function M.rename()
 		return
 	end
 
-	local parent = entry.parent
-
-	input.prompt("Rename to " .. api.path.add_trailing(parent.path), api.path.basename(from_path), "dir", function(name)
+	input.prompt("Rename: ", entry.path, "file", function(to_path)
 		input.clear()
-		if name == nil or name == "" then
+		if to_path == nil or to_path == "" then
 			return
 		end
-
-		local to_path = api.path.join({ parent.path, name })
 
 		if api.path.exists(to_path) then
 			api.log.warn(to_path .. " already exists")
@@ -104,13 +100,7 @@ function M.rename()
 			-- focus file
 			api.navigation.focus(to_path)
 
-			api.log.info(
-				string.format(
-					"Renaming file %s ➜ %s complete",
-					api.path.basename(from_path),
-					api.path.basename(to_path)
-				)
-			)
+			api.log.info(string.format("Renaming file %s ➜ %s complete", from_path, to_path))
 		else
 			api.log.error(string.format("Renaming file %s failed due to an error", api.path.basename(from_path)))
 		end
@@ -294,23 +284,6 @@ function M.copy()
 		end
 
 		_paste_signle(entry.path, dest_path, fs.cp)
-		-- reload the tree
-		api.explorer.reload()
-		-- focus the new path
-		api.navigation.focus(dest_path)
-	end)
-end
-
---- move file/directory
-function M.move()
-	local entry = api.entry.current()
-	input.prompt("Move: " .. entry.path .. " -> ", entry.path, "file", function(dest_path)
-		input.clear()
-		if dest_path == nil or dest_path == "" then
-			return
-		end
-
-		_paste_signle(entry.path, dest_path, fs.mv)
 		-- reload the tree
 		api.explorer.reload()
 		-- focus the new path

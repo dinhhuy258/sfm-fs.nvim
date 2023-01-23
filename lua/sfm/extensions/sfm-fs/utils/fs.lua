@@ -10,7 +10,7 @@ function M.touch(fpath)
 	if not api.path.exists(dir) then
 		-- create dir
 		if not M.mkdir(dir) then
-		  return false
+			return false
 		end
 	end
 
@@ -127,6 +127,14 @@ function M.cp(source_path, dest_path)
 		return true
 	end
 
+	local to_dir = api.path.dirname(dest_path)
+	if not api.path.exists(to_dir) then
+		local success = M.mkdir(to_dir)
+		if not success then
+			return false
+		end
+	end
+
 	local source_lstat = vim.loop.fs_lstat(source_path)
 
 	if api.path.isfile(source_path) then
@@ -174,6 +182,14 @@ function M.mv(source_path, dest_path)
 	if source_path == dest_path then
 		-- do nothing
 		return true
+	end
+
+	local to_dir = api.path.dirname(dest_path)
+	if not api.path.exists(to_dir) then
+		local success = M.mkdir(to_dir)
+		if not success then
+			return false
+		end
 	end
 
 	return vim.loop.fs_rename(source_path, dest_path)
