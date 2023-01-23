@@ -2,8 +2,20 @@ local api = require("sfm.api")
 
 local M = {}
 
-function M.create_file(fpath)
-	local fd = vim.loop.fs_open(fpath, "w", 420)
+--- create a file
+---@param fpath string
+---@return boolean
+function M.touch(fpath)
+	local dir = api.path.dirname(fpath)
+	if not api.path.exists(dir) then
+		-- create dir
+		if not M.mkdir(dir) then
+		  return false
+		end
+	end
+
+	local mode = 420
+	local fd = vim.loop.fs_open(fpath, "w", mode)
 	if not fd then
 		return false
 	end
@@ -13,10 +25,47 @@ function M.create_file(fpath)
 	return true
 end
 
-function M.create_dir(fpath)
-	return vim.loop.fs_mkdir(fpath, 493)
+--- create a directory
+---@param fpath string
+---@return boolean
+function M.mkdir(fpath)
+	local mode = 493
+	local success = vim.loop.fs_mkdir(fpath, mode)
+
+	if not success then
+		local dirs = api.path.split(fpath)
+		local processed = ""
+
+		for _, dir in ipairs(dirs) do
+			if dir ~= "" then
+				local joined = api.path.join({ processed, dir })
+				if processed == "" and api.path.path_separator == "\\" then
+					joined = dir
+				end
+
+				if api.path.exists(joined) then
+					if api.path.isfile(joined) then
+						return false
+					elseif api.path.isdir(joined) then
+						processed = joined
+					end
+				else
+					if vim.loop.fs_mkdir(joined, mode) then
+						processed = joined
+					else
+						return false
+					end
+				end
+			end
+		end
+	end
+
+	return true
 end
 
+--- scan the dir
+---@param fpath string
+---@return table
 function M.scandir(fpath)
 	local paths = {}
 	local handle = vim.loop.fs_scandir(fpath)
@@ -34,16 +83,22 @@ function M.scandir(fpath)
 	return paths
 end
 
+--- remove the file/directory for the given fpath
+---@param fpath string
+---@return boolean
 function M._rmdir(fpath)
 	local paths = M.scandir(fpath)
 	for _, p in ipairs(paths) do
-		M.remove(p)
+		M.rm(p)
 	end
 
 	return vim.loop.fs_rmdir(fpath)
 end
 
-function M.remove(fpath)
+--- remove the file/directory for the given fpath
+---@param fpath string
+---@return boolean
+function M.rm(fpath)
 	if not api.path.exists(fpath) then
 		return false
 	end
@@ -58,11 +113,11 @@ function M.remove(fpath)
 	end
 end
 
-function M.rename(from_path, to_path)
-	return vim.loop.fs_rename(from_path, to_path)
-end
-
-function M.copy(source_path, dest_path)
+--- copy file/directory from source_path to dest_path
+---@param source_path string
+---@param dest_path string
+---@return boolean
+function M.cp(source_path, dest_path)
 	if not api.path.exists(source_path) then
 		return false
 	end
@@ -95,7 +150,7 @@ function M.copy(source_path, dest_path)
 				break
 			end
 
-			success = M.copy(api.path.join({ source_path, name }), api.path.join({ dest_path, name }))
+			success = M.cp(api.path.join({ source_path, name }), api.path.join({ dest_path, name }))
 			if not success then
 				return false
 			end
@@ -107,7 +162,11 @@ function M.copy(source_path, dest_path)
 	return true
 end
 
-function M.move(source_path, dest_path)
+--- rename/move source_path to dest_path
+---@param source_path string
+---@param dest_path string
+---@return boolean
+function M.mv(source_path, dest_path)
 	if not api.path.exists(source_path) then
 		return false
 	end
@@ -117,7 +176,7 @@ function M.move(source_path, dest_path)
 		return true
 	end
 
-	return M.rename(source_path, dest_path)
+	return vim.loop.fs_rename(source_path, dest_path)
 end
 
 return M

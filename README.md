@@ -70,16 +70,18 @@ sfm_explorer:load_extension("sfm-fs", {
 
 To use the functionalities provided by the `sfm-fs` extension, you can use the following key bindings:
 
-| Key     | Action            | Description                                                  |
-| ------- | ----------------- | ------------------------------------------------------------ |
-| n       | create            | Create a new file/directory in the current folder            |
-| dd      | delete            | Delete the current file or directory                         |
-| r       | rename            | Rename the current file or directory                         |
-| space   | toggle_selection  | Toggle the selection of the current file or directory        |
-| c-space | clear_selections  | Clear all selections                                         |
-| p       | copy_selections   | Copy all selected files or directories to the current folder |
-| x       | move_selections   | Move all selected files or directories to the current folder |
-| ds      | delete_selections | Delete all selected files or directories                     |
+| Key     | Action            | Description                                                                    |
+| ------- | ----------------- | ------------------------------------------------------------------------------ |
+| n       | create            | Create a new file/directory in the current folder                              |
+| dd      | delete            | Delete the current file or directory                                           |
+| r       | rename            | Rename the current file or directory                                           |
+| space   | toggle_selection  | Toggle the selection of the current file or directory                          |
+| c-space | clear_selections  | Clear all selections                                                           |
+| c       | copy              | Copy the current file or directory to a destination path specified by the user |
+| p       | copy_selections   | Copy all selected files or directories to the current folder                   |
+| m       | move              | Move the current file or directory to a destination path specified by the user |
+| x       | move_selections   | Move all selected files or directories to the current folder                   |
+| ds      | delete_selections | Delete all selected files or directories                                       |
 
 You can customize these key bindings by setting them via the `mappings` configuration. It's similar to the way [nvim-tree](https://github.com/nvim-tree/nvim-tree.lua) handles mapping overrides.
 

@@ -12,8 +12,16 @@ local default_mappings = {
 		action = "delete_selections",
 	},
 	{
+		key = "c",
+		action = "copy",
+	},
+	{
 		key = "p",
 		action = "copy_selections",
+	},
+	{
+		key = "m",
+		action = "move",
 	},
 	{
 		key = "x",

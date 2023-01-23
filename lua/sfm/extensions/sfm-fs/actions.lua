@@ -13,7 +13,7 @@ function M.delete()
 		-- on yes
 		input.clear()
 
-		if fs.remove(entry.path) then
+		if fs.rm(entry.path) then
 			api.log.info(entry.path .. " has been deleted")
 		else
 			api.log.error("Deletion of file " .. entry.name .. " failed due to an error.")
@@ -54,10 +54,10 @@ function M.create()
 		local ok = true
 		if api.path.has_trailing(name) then
 			-- create directory
-			ok = fs.create_dir(fpath)
+			ok = fs.mkdir(fpath)
 		else
 			-- create file
-			ok = fs.create_file(fpath)
+			ok = fs.touch(fpath)
 		end
 
 		if ok then
@@ -98,7 +98,7 @@ function M.rename()
 			return
 		end
 
-		if fs.rename(from_path, to_path) then
+		if fs.mv(from_path, to_path) then
 			-- reload the explorer
 			api.explorer.reload()
 			-- focus file
@@ -138,7 +138,7 @@ function M.delete_selections()
 
 		local success_count = 0
 		for _, fpath in ipairs(paths) do
-			if fs.remove(fpath) then
+			if fs.rm(fpath) then
 				success_count = success_count + 1
 			end
 		end
@@ -165,33 +165,86 @@ function M.delete_selections()
 	end)
 end
 
---- move/copy selected files/directories to a current opened entry or it's parent
----@param paths table
+--- copy/move file or directory
+---@param from_path string
+---@param to_path string
 ---@param action_fn function
-local function _paste(paths, action_fn)
-	local dest_entry = api.entry.current()
-	if not dest_entry.is_dir or not dest_entry.is_open then
-		dest_entry = dest_entry.parent
-	end
-
+local function _paste_signle(from_path, to_path, action_fn)
 	local success_count = 0
-	local continue_processing = true
 
-	for _, fpath in ipairs(paths) do
-		local basename = api.path.basename(fpath)
-		local dest_path = api.path.join({ dest_entry.path, basename })
-
-		if api.path.exists(dest_path) then
-			input.confirm(dest_path .. " already exists. Rename it? (y/n)", function()
-				-- on yes
-				input.clear()
-				input.prompt("New name " .. api.path.add_trailing(dest_entry.path), basename, "file", function(name)
+	if api.path.exists(to_path) then
+		input.confirm(to_path .. " already exists. Rename it? (y/n)", function()
+			-- on yes
+			input.clear()
+			local to_dir = api.path.dirname(to_path)
+			input.prompt(
+				"New name " .. api.path.add_trailing(to_dir),
+				api.path.basename(to_path),
+				"file",
+				function(name)
 					input.clear()
 					if name == nil or name == "" then
 						return
 					end
 
-					dest_path = api.path.join({ dest_entry.path, name })
+					to_path = api.path.join({ to_dir, name })
+
+					if api.path.exists(to_path) then
+						api.log.warn(to_path .. " already exists")
+
+						return
+					end
+
+					if action_fn(to_path, to_path) then
+						success_count = success_count + 1
+					end
+				end
+			)
+		end, function()
+			-- on no
+			input.clear()
+		end, function()
+			-- on cancel
+			input.clear()
+		end)
+	else
+		if action_fn(from_path, to_path) then
+			success_count = success_count + 1
+		end
+	end
+
+	api.log.info(
+		string.format(
+			"Copy/move process complete. %d files copied/moved successfully, %d files failed.",
+			success_count,
+			1 - success_count
+		)
+	)
+end
+
+--- move/copy selected files/directories to a current opened entry or it's parent
+---@param from_paths table
+---@param to_dir string
+---@param action_fn function
+local function _paste(from_paths, to_dir, action_fn)
+	local success_count = 0
+	local continue_processing = true
+
+	for _, fpath in ipairs(from_paths) do
+		local basename = api.path.basename(fpath)
+		local dest_path = api.path.join({ to_dir, basename })
+
+		if api.path.exists(dest_path) then
+			input.confirm(dest_path .. " already exists. Rename it? (y/n)", function()
+				-- on yes
+				input.clear()
+				input.prompt("New name " .. api.path.add_trailing(to_dir), basename, "file", function(name)
+					input.clear()
+					if name == nil or name == "" then
+						return
+					end
+
+					dest_path = api.path.join({ to_dir, name })
 
 					if api.path.exists(dest_path) then
 						api.log.warn(dest_path .. " already exists")
@@ -226,9 +279,43 @@ local function _paste(paths, action_fn)
 		string.format(
 			"Copy/move process complete. %d files copied/moved successfully, %d files failed.",
 			success_count,
-			vim.tbl_count(paths) - success_count
+			vim.tbl_count(from_paths) - success_count
 		)
 	)
+end
+
+--- copy file/directory
+function M.copy()
+	local entry = api.entry.current()
+	input.prompt("Copy: " .. entry.path .. " -> ", entry.path, "file", function(dest_path)
+		input.clear()
+		if dest_path == nil or dest_path == "" then
+			return
+		end
+
+		_paste_signle(entry.path, dest_path, fs.cp)
+		-- reload the tree
+		api.explorer.reload()
+		-- focus the new path
+		api.navigation.focus(dest_path)
+	end)
+end
+
+--- move file/directory
+function M.move()
+	local entry = api.entry.current()
+	input.prompt("Move: " .. entry.path .. " -> ", entry.path, "file", function(dest_path)
+		input.clear()
+		if dest_path == nil or dest_path == "" then
+			return
+		end
+
+		_paste_signle(entry.path, dest_path, fs.mv)
+		-- reload the tree
+		api.explorer.reload()
+		-- focus the new path
+		api.navigation.focus(dest_path)
+	end)
 end
 
 --- copy selected files/directories to a current opened entry or it's parent
@@ -245,7 +332,12 @@ function M.copy_selections()
 		table.insert(paths, fpath)
 	end
 
-	_paste(paths, fs.copy)
+	local dest_entry = api.entry.current()
+	if not dest_entry.is_dir or not dest_entry.is_open then
+		dest_entry = dest_entry.parent
+	end
+
+	_paste(paths, dest_entry.path, fs.cp)
 
 	ctx.clear_selections()
 	api.explorer.reload()
@@ -266,7 +358,12 @@ function M.move_selections()
 	end
 	paths = api.path.unify(paths)
 
-	_paste(paths, fs.move)
+	local dest_entry = api.entry.current()
+	if not dest_entry.is_dir or not dest_entry.is_open then
+		dest_entry = dest_entry.parent
+	end
+
+	_paste(paths, dest_entry.path, fs.mv)
 
 	ctx.clear_selections()
 	api.explorer.reload()
