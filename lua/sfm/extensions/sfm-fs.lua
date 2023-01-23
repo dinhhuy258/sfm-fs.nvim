@@ -4,12 +4,14 @@ local config = require("sfm.extensions.sfm-fs.config")
 local colors = require("sfm.extensions.sfm-fs.colors")
 local selection_renderer = require("sfm.extensions.sfm-fs.selection_renderer")
 local ctx = require("sfm.extensions.sfm-fs.context")
+local actions = require("sfm.extensions.sfm-fs.actions")
 
 local M = {}
 
 function M.setup(sfm_explorer, opts)
 	config.setup(opts)
 	colors.setup()
+	actions.setup()
 
 	vim.api.nvim_create_autocmd("ColorScheme", {
 		callback = function()
@@ -23,30 +25,15 @@ function M.setup(sfm_explorer, opts)
 
 	sfm_explorer:subscribe(event.ExplorerOpened, function(payload)
 		local bufnr = payload["bufnr"]
-		local options = {
-			noremap = true,
-			silent = true,
-			expr = false,
-		}
+		local options = { noremap = true, silent = true, nowait = true, buffer = bufnr }
+
 		for _, map in pairs(config.opts.mappings.list) do
-			if type(map.key) == "table" then
-				for _, key in pairs(map.key) do
-					vim.api.nvim_buf_set_keymap(
-						bufnr,
-						"n",
-						key,
-						"<CMD>lua require('sfm.extensions.sfm-fs.actions')." .. map.action .. "()<CR>",
-						options
-					)
-				end
-			else
-				vim.api.nvim_buf_set_keymap(
-					bufnr,
-					"n",
-					map.key,
-					"<CMD>lua require('sfm.extensions.sfm-fs.actions')." .. map.action .. "()<CR>",
-					options
-				)
+			local keys = type(map.key) == "table" and map.key or { map.key }
+
+			for _, key in pairs(keys) do
+				vim.keymap.set("n", key, function()
+					actions.run(map.action)
+				end, options)
 			end
 		end
 	end)

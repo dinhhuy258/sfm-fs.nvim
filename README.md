@@ -78,7 +78,22 @@ To use the functionalities provided by the `sfm-fs` extension, you can use the f
 | space   | toggle_selection  | Toggle the selection of the current file or directory                          |
 | c-space | clear_selections  | Clear all selections                                                           |
 
-You can customize these key bindings by setting them via the `mappings` configuration. It's similar to the way [nvim-tree](https://github.com/nvim-tree/nvim-tree.lua) handles mapping overrides.
+You can customize these key bindings by defining action names in the `mappings` configuration option. For example:
+
+```lua
+sfm_explorer:load_extension("sfm-fs", {
+  mappings = {
+    list = {
+      {
+        key = "l",
+        action = "create",
+      },
+    },
+  },
+}
+```
+
+Please note that if the action for a key is set to `nil` or an empty string, the default key binding for that key will be disabled. Also, ensure that the action provided is a valid function or action name, as listed in the above table.
 
 ## Highlighting
 

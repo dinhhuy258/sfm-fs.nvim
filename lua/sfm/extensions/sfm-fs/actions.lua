@@ -6,6 +6,8 @@ local fs = require("sfm.extensions.sfm-fs.utils.fs")
 
 local M = {}
 
+local Actions = {}
+
 --- delete a file/directory
 function M.delete()
 	local entry = api.entry.current()
@@ -331,6 +333,39 @@ end
 function M.clear_selections()
 	ctx.clear_selections()
 	api.explorer.refresh()
+end
+
+--- run the given action name
+---@param action string
+function M.run(action)
+  local defined_action = Actions[action]
+  if defined_action == nil then
+    api.log.error(
+      string.format(
+        "Invalid action name '%s' provided. Please provide a valid action name or check your configuration for any mistakes.",
+        action
+      )
+    )
+
+    return
+  end
+
+  defined_action()
+end
+
+--- setup
+function M.setup()
+	Actions = {
+		create = M.create,
+		delete = M.delete,
+		delete_selections = M.delete_selections,
+		copy = M.copy,
+		copy_selections = M.copy_selections,
+		move = M.move,
+		move_selections = M.move_selections,
+		toggle_selection = M.toggle_selection,
+		clear_selections = M.clear_selections,
+	}
 end
 
 return M
