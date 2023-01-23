@@ -31,6 +31,12 @@ The `sfm-fs` plugin provides the following configuration options:
 
 ```lua
 local default_config = {
+	view = {
+    -- this option allows you to specify where to render the selection icon in the file explorer.
+    -- the default value is `false`, which means the selection icon will be rendered before the entry name.
+    -- if you set this option to `true`, the selection icon will be rendered in the Vim sign column.
+		render_selection_in_sign = false,
+	},
   icons = {
     selection = "",
   },
@@ -47,8 +53,11 @@ You can override the default configuration in `load_extension` method
 
 ```lua
 sfm_explorer:load_extension("sfm-fs", {
+	view = {
+		render_selection_in_sign = true,
+	},
   icons = {
-    selection = "",
+    selection = "*",
   }
 })
 ```

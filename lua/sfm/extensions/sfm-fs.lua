@@ -51,8 +51,17 @@ function M.setup(sfm_explorer, opts)
 		end
 	end)
 
-	-- indent(10), indicator(20), icon(30), selection(31), name(40)
-	sfm_explorer:register_renderer("sfm-fs-selection", 39, selection_renderer.render_selection)
+	if config.opts.view.render_selection_in_sign then
+		selection_renderer.init_sign()
+
+		sfm_explorer:subscribe(event.ExplorerRendered, function(payload)
+			local bufnr = payload["bufnr"]
+			selection_renderer.render_selection_in_sign(bufnr)
+		end)
+	else
+		-- indent(10), indicator(20), icon(30), selection(31), name(40)
+		sfm_explorer:register_renderer("sfm-fs-selection", 39, selection_renderer.render_selection)
+	end
 end
 
 return M

@@ -38,6 +38,9 @@ local default_mappings = {
 }
 
 local default_config = {
+	view = {
+		render_selection_in_sign = false,
+	},
 	icons = {
 		selection = "",
 	},
