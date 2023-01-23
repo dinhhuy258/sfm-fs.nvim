@@ -73,40 +73,6 @@ function M.create()
 	end)
 end
 
---- rename a current file/directory
-function M.rename()
-	local entry = api.entry.current()
-	local from_path = entry.path
-
-	if entry.is_root then
-		return
-	end
-
-	input.prompt("Rename: ", entry.path, "file", function(to_path)
-		input.clear()
-		if to_path == nil or to_path == "" then
-			return
-		end
-
-		if api.path.exists(to_path) then
-			api.log.warn(to_path .. " already exists")
-
-			return
-		end
-
-		if fs.mv(from_path, to_path) then
-			-- reload the explorer
-			api.explorer.reload()
-			-- focus file
-			api.navigation.focus(to_path)
-
-			api.log.info(string.format("Renaming file %s ➜ %s complete", from_path, to_path))
-		else
-			api.log.error(string.format("Renaming file %s failed due to an error", api.path.basename(from_path)))
-		end
-	end)
-end
-
 --- delete selected files/directories
 function M.delete_selections()
 	local selections = ctx.get_selections()
@@ -153,63 +119,6 @@ function M.delete_selections()
 		-- on cancel
 		input.clear()
 	end)
-end
-
---- copy/move file or directory
----@param from_path string
----@param to_path string
----@param action_fn function
-local function _paste_signle(from_path, to_path, action_fn)
-	local success_count = 0
-
-	if api.path.exists(to_path) then
-		input.confirm(to_path .. " already exists. Rename it? (y/n)", function()
-			-- on yes
-			input.clear()
-			local to_dir = api.path.dirname(to_path)
-			input.prompt(
-				"New name " .. api.path.add_trailing(to_dir),
-				api.path.basename(to_path),
-				"file",
-				function(name)
-					input.clear()
-					if name == nil or name == "" then
-						return
-					end
-
-					to_path = api.path.join({ to_dir, name })
-
-					if api.path.exists(to_path) then
-						api.log.warn(to_path .. " already exists")
-
-						return
-					end
-
-					if action_fn(to_path, to_path) then
-						success_count = success_count + 1
-					end
-				end
-			)
-		end, function()
-			-- on no
-			input.clear()
-		end, function()
-			-- on cancel
-			input.clear()
-		end)
-	else
-		if action_fn(from_path, to_path) then
-			success_count = success_count + 1
-		end
-	end
-
-	api.log.info(
-		string.format(
-			"Copy/move process complete. %d files copied/moved successfully, %d files failed.",
-			success_count,
-			1 - success_count
-		)
-	)
 end
 
 --- move/copy selected files/directories to a current opened entry or it's parent
@@ -274,20 +183,84 @@ local function _paste(from_paths, to_dir, action_fn)
 	)
 end
 
---- copy file/directory
-function M.copy()
+--TODO: Remove this method
+function M.rename()
+	api.log.warn(
+		"The action rename() is deprecated and will be removed in a future version. Please use the new action move() instead."
+	)
+
+	return M.move()
+end
+
+--- move/rename a current file/directory
+function M.move()
 	local entry = api.entry.current()
-	input.prompt("Copy: " .. entry.path .. " -> ", entry.path, "file", function(dest_path)
+	local from_path = entry.path
+
+	if entry.is_root then
+		return
+	end
+
+	input.prompt("Move: ", entry.path, "file", function(to_path)
 		input.clear()
-		if dest_path == nil or dest_path == "" then
+		if to_path == nil or to_path == "" then
 			return
 		end
 
-		_paste_signle(entry.path, dest_path, fs.cp)
-		-- reload the tree
-		api.explorer.reload()
-		-- focus the new path
-		api.navigation.focus(dest_path)
+		if api.path.exists(to_path) then
+			api.log.warn(to_path .. " already exists")
+
+			return
+		end
+
+		if fs.mv(from_path, to_path) then
+			-- reload the explorer
+			api.explorer.reload()
+			-- focus file
+			api.navigation.focus(to_path)
+
+			api.log.info(string.format("Moving file/directory %s ➜ %s complete", from_path, to_path))
+		else
+			api.log.error(
+				string.format("Moving file/directory %s failed due to an error", api.path.basename(from_path))
+			)
+		end
+	end)
+end
+
+--- copy file/directory
+function M.copy()
+	local entry = api.entry.current()
+	local from_path = entry.path
+
+	if entry.is_root then
+		return
+	end
+
+	input.prompt("Copy: " .. from_path .. " -> ", from_path, "file", function(to_path)
+		input.clear()
+		if to_path == nil or to_path == "" then
+			return
+		end
+
+		if api.path.exists(to_path) then
+			api.log.warn(to_path .. " already exists")
+
+			return
+		end
+
+		if fs.cp(entry.path, to_path) then
+			-- reload the explorer
+			api.explorer.reload()
+			-- focus file
+			api.navigation.focus(to_path)
+
+			api.log.info(string.format("Copying file/directory %s ➜ %s complete", from_path, to_path))
+		else
+			api.log.error(
+				string.format("Copying file/directory %s failed due to an error", api.path.basename(from_path))
+			)
+		end
 	end)
 end
 

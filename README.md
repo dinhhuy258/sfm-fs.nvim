@@ -62,7 +62,7 @@ To use the functionalities provided by the `sfm-fs` extension, you can use the f
 | n       | create            | Create a new file/directory in the current folder                              |
 | c       | copy              | Copy the current file or directory to a destination path specified by the user |
 | p       | copy_selections   | Copy all selected files or directories to the current folder                   |
-| r       | rename            | Rename the current file or directory                                           |
+| r       | move              | Move/rename the current file or directory                                      |
 | x       | move_selections   | Move all selected files or directories to the current folder                   |
 | dd      | delete            | Delete the current file or directory                                           |
 | ds      | delete_selections | Delete all selected files or directories                                       |

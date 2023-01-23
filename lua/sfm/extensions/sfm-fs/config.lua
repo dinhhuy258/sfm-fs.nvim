@@ -25,7 +25,7 @@ local default_mappings = {
 	},
 	{
 		key = "r",
-		action = "rename",
+		action = "move",
 	},
 	{
 		key = "<SPACE>",
