@@ -183,13 +183,6 @@ local function _paste(from_paths, to_dir, action_fn)
 	)
 end
 
---TODO: Remove this method
-function M.rename()
-	api.log.warn(
-		"The action rename() is deprecated and will be removed in a future version. Please use the new action move() instead."
-	)
-end
-
 --- move/rename a current file/directory
 function M.move()
 	local entry = api.entry.current()
