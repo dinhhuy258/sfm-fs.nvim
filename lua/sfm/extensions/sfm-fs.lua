@@ -34,6 +34,12 @@ function M.setup(sfm_explorer, opts)
 				vim.keymap.set("n", key, function()
 					actions.run(map.action)
 				end, options)
+
+				if map.action == "toggle_selection" then
+					vim.keymap.set("x", key, function()
+						actions.run(map.action)
+					end, options)
+				end
 			end
 		end
 	end)

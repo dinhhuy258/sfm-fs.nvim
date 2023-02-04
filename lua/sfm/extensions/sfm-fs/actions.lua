@@ -313,9 +313,9 @@ function M.move_selections()
 	api.explorer.reload()
 end
 
---- toggle a current file/directory to bookmarks list
-function M.toggle_selection()
-	local entry = api.entry.current()
+--- toggle selection for the given entry
+---@param entry userdata
+local function toggle_selection_entry(entry)
 	if entry.is_root then
 		return
 	end
@@ -324,6 +324,22 @@ function M.toggle_selection()
 		ctx.remove_selection(entry)
 	else
 		ctx.set_selection(entry)
+	end
+end
+
+--- toggle a current file/directory to bookmarks list
+function M.toggle_selection()
+	local mode = vim.fn.mode()
+	if mode == "n" then
+		toggle_selection_entry(api.entry.current())
+	elseif mode == "v" or mode == "V" then
+		vim.cmd('noau normal! "vy"')
+		local start_line, end_line = vim.api.nvim_buf_get_mark(0, "<")[1], vim.api.nvim_buf_get_mark(0, ">")[1]
+		local entries = api.entry.all()
+
+		for line = start_line, end_line do
+			toggle_selection_entry(entries[line])
+		end
 	end
 
 	api.explorer.refresh()
@@ -338,19 +354,19 @@ end
 --- run the given action name
 ---@param action string
 function M.run(action)
-  local defined_action = Actions[action]
-  if defined_action == nil then
-    api.log.error(
-      string.format(
-        "Invalid action name '%s' provided. Please provide a valid action name or check your configuration for any mistakes.",
-        action
-      )
-    )
+	local defined_action = Actions[action]
+	if defined_action == nil then
+		api.log.error(
+			string.format(
+				"Invalid action name '%s' provided. Please provide a valid action name or check your configuration for any mistakes.",
+				action
+			)
+		)
 
-    return
-  end
+		return
+	end
 
-  defined_action()
+	defined_action()
 end
 
 --- setup
