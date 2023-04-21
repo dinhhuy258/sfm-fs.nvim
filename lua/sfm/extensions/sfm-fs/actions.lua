@@ -23,9 +23,8 @@ function M.delete()
 		end
 
 		-- dispatch an event
-		api.event.dispatch(event.EntryDeleted, {
-			path = entry.path,
-		})
+    event.dispatch_entry_deleted(entry.path)
+
 		-- reload the explorer
 		api.explorer.reload()
 	end, function()
@@ -67,9 +66,7 @@ function M.create()
 
 		if ok then
 			-- dispatch an event
-			api.event.dispatch(event.EntryCreated, {
-				path = fpath,
-			})
+      event.dispatch_entry_created(fpath)
 			-- reload the explorer
 			api.explorer.reload()
 			-- focus file
@@ -106,9 +103,7 @@ function M.delete_selections()
 			if fs.rm(fpath) then
 				success_count = success_count + 1
 				-- dispatch an event
-				api.event.dispatch(event.EntryDeleted, {
-					path = fpath,
-				})
+        event.dispatch_entry_deleted(fpath)
 			end
 		end
 
@@ -138,7 +133,8 @@ end
 ---@param from_paths table
 ---@param to_dir string
 ---@param action_fn function
-local function _paste(from_paths, to_dir, action_fn)
+---@param on_action_success_fn function?
+local function _paste(from_paths, to_dir, action_fn, on_action_success_fn)
 	local success_count = 0
 	local continue_processing = true
 
@@ -166,6 +162,10 @@ local function _paste(from_paths, to_dir, action_fn)
 
 					if action_fn(fpath, dest_path) then
 						success_count = success_count + 1
+
+						if on_action_success_fn ~= nil then
+							on_action_success_fn(fpath, dest_path)
+						end
 					end
 				end)
 			end, function()
@@ -222,6 +222,8 @@ function M.move()
 			api.explorer.reload()
 			-- focus file
 			api.navigation.focus(to_path)
+			-- dispatch an event
+      event.dispatch_entry_renamed(from_path, to_path)
 
 			api.log.info(string.format("Moving file/directory %s ➜ %s complete", from_path, to_path))
 		else
@@ -287,7 +289,7 @@ function M.copy_selections()
 		dest_entry = dest_entry.parent
 	end
 
-	_paste(paths, dest_entry.path, fs.cp)
+	_paste(paths, dest_entry.path, fs.cp, nil)
 
 	ctx.clear_selections()
 	api.explorer.reload()
@@ -313,7 +315,10 @@ function M.move_selections()
 		dest_entry = dest_entry.parent
 	end
 
-	_paste(paths, dest_entry.path, fs.mv)
+	_paste(paths, dest_entry.path, fs.mv, function(from_path, to_path)
+		-- dispatch an event
+    event.dispatch_entry_renamed(from_path, to_path)
+	end)
 
 	ctx.clear_selections()
 	api.explorer.reload()
