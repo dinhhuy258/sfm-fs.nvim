@@ -1,5 +1,6 @@
 local api = require("sfm.api")
 
+local event = require("sfm.extensions.sfm-fs.event")
 local ctx = require("sfm.extensions.sfm-fs.context")
 local input = require("sfm.extensions.sfm-fs.utils.input")
 local fs = require("sfm.extensions.sfm-fs.utils.fs")
@@ -21,6 +22,10 @@ function M.delete()
 			api.log.error("Deletion of file " .. entry.name .. " failed due to an error.")
 		end
 
+		-- dispatch an event
+		api.event.dispatch(event.EntryDeleted, {
+			path = entry.path,
+		})
 		-- reload the explorer
 		api.explorer.reload()
 	end, function()
@@ -61,6 +66,10 @@ function M.create()
 		end
 
 		if ok then
+			-- dispatch an event
+			api.event.dispatch(event.EntryCreated, {
+				path = fpath,
+			})
 			-- reload the explorer
 			api.explorer.reload()
 			-- focus file
@@ -96,6 +105,10 @@ function M.delete_selections()
 		for _, fpath in ipairs(paths) do
 			if fs.rm(fpath) then
 				success_count = success_count + 1
+				-- dispatch an event
+				api.event.dispatch(event.EntryDeleted, {
+					path = fpath,
+				})
 			end
 		end
 
