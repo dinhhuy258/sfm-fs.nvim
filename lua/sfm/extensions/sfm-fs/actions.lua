@@ -23,7 +23,7 @@ function M.delete()
 		end
 
 		-- dispatch an event
-    event.dispatch_entry_deleted(entry.path)
+		event.dispatch_entry_deleted(entry.path)
 
 		-- reload the explorer
 		api.explorer.reload()
@@ -66,7 +66,7 @@ function M.create()
 
 		if ok then
 			-- dispatch an event
-      event.dispatch_entry_created(fpath)
+			event.dispatch_entry_created(fpath)
 			-- reload the explorer
 			api.explorer.reload()
 			-- focus file
@@ -103,7 +103,7 @@ function M.delete_selections()
 			if fs.rm(fpath) then
 				success_count = success_count + 1
 				-- dispatch an event
-        event.dispatch_entry_deleted(fpath)
+				event.dispatch_entry_deleted(fpath)
 			end
 		end
 
@@ -133,8 +133,9 @@ end
 ---@param from_paths table
 ---@param to_dir string
 ---@param action_fn function
+---@param before_action_fn function?
 ---@param on_action_success_fn function?
-local function _paste(from_paths, to_dir, action_fn, on_action_success_fn)
+local function _paste(from_paths, to_dir, action_fn, before_action_fn, on_action_success_fn)
 	local success_count = 0
 	local continue_processing = true
 
@@ -158,6 +159,10 @@ local function _paste(from_paths, to_dir, action_fn, on_action_success_fn)
 						api.log.warn(dest_path .. " already exists")
 
 						return
+					end
+
+					if before_action_fn ~= nil then
+						before_action_fn(fpath, dest_path)
 					end
 
 					if action_fn(fpath, dest_path) then
@@ -217,13 +222,15 @@ function M.move()
 			return
 		end
 
+		event.dispatch_entry_will_rename(from_path, to_path)
+
 		if fs.mv(from_path, to_path) then
 			-- reload the explorer
 			api.explorer.reload()
 			-- focus file
 			api.navigation.focus(to_path)
 			-- dispatch an event
-      event.dispatch_entry_renamed(from_path, to_path)
+			event.dispatch_entry_renamed(from_path, to_path)
 
 			api.log.info(string.format("Moving file/directory %s ➜ %s complete", from_path, to_path))
 		else
@@ -289,7 +296,7 @@ function M.copy_selections()
 		dest_entry = dest_entry.parent
 	end
 
-	_paste(paths, dest_entry.path, fs.cp, nil)
+	_paste(paths, dest_entry.path, fs.cp, nil, nil)
 
 	ctx.clear_selections()
 	api.explorer.reload()
@@ -316,8 +323,9 @@ function M.move_selections()
 	end
 
 	_paste(paths, dest_entry.path, fs.mv, function(from_path, to_path)
-		-- dispatch an event
-    event.dispatch_entry_renamed(from_path, to_path)
+		event.dispatch_entry_will_rename(from_path, to_path)
+	end, function(from_path, to_path)
+		event.dispatch_entry_renamed(from_path, to_path)
 	end)
 
 	ctx.clear_selections()

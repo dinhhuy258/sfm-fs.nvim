@@ -6,6 +6,7 @@ M.Event = {
 	EntryCreated = "EntryCreated",
 	EntryDeleted = "EntryDeleted",
 	EntryRenamed = "EntryRenamed",
+	EntryWillRename = "EntryWillRename",
 }
 
 --- dispatch entry created event
@@ -29,6 +30,16 @@ end
 ---@param to_path string
 function M.dispatch_entry_renamed(from_path, to_path)
 	api.event.dispatch(M.EntryRenamed, {
+		from_path = from_path,
+		to_path = to_path,
+	})
+end
+
+--- dispatch entry will rename event
+---@param from_path string
+---@param to_path string
+function M.dispatch_entry_will_rename(from_path, to_path)
+	api.event.dispatch(M.EntryWillRename, {
 		from_path = from_path,
 		to_path = to_path,
 	})
