@@ -100,3 +100,29 @@ Please note that if the action for a key is set to `nil` or an empty string, the
 The following highlight values are used in the `sfm-fs` extension:
 
 - `SFMSelection`: This highlight value is used to highlight the selection indicator of selected entries. The default color scheme for this highlight value is `blue`.
+
+## Events
+
+`sfm-fs` dispatches events whenever an action is made in the explorer. These events can be subscribed to through handler functions, allowing for even further customization of `sfm`.
+
+**Available events:**
+
+- `EntryCreated`: Dispatched when a new file/directory is created. The payload of the event is a table with the following keys:
+  - `path`: The entry path of the deleted entry
+- `EntryDeleted`: Dispatched when a new file/directory is created. The payload of the event is a table with the following keys:
+  - `path`: The entry path of the newly created entry
+- `EntryWillRename`: Dispatched when a file/directory will be renamed. The payload of the event is a table with the following keys:
+  - `from_path`: The old path
+  - `to_path`: The new path
+- `EntryRenamed`: Dispatched when a file/directory is renamed. The payload of the event is a table with the following keys:
+  - `from_path`: The old path
+  - `to_path`: The new path
+
+Here's an example of how you might use the API provided by the `sfm` plugin in your own extension or configuration file:
+
+```lua
+sfm_explorer:subscribe(sfm_fs_event.Event.EntryCreated, function(payload)
+  -- handle the event here
+  print("New entry created: " .. payload)
+end)
+```

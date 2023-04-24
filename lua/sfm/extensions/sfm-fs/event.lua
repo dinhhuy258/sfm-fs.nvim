@@ -12,7 +12,7 @@ M.Event = {
 --- dispatch entry created event
 ---@param fpath string
 function M.dispatch_entry_created(fpath)
-	api.event.dispatch(M.EntryCreated, {
+	api.event.dispatch(M.Event.EntryCreated, {
 		path = fpath,
 	})
 end
@@ -20,7 +20,7 @@ end
 --- dispatch entry deleted event
 ---@param fpath string
 function M.dispatch_entry_deleted(fpath)
-	api.event.dispatch(M.EntryDeleted, {
+	api.event.dispatch(M.Event.EntryDeleted, {
 		path = fpath,
 	})
 end
@@ -29,7 +29,7 @@ end
 ---@param from_path string
 ---@param to_path string
 function M.dispatch_entry_renamed(from_path, to_path)
-	api.event.dispatch(M.EntryRenamed, {
+	api.event.dispatch(M.Event.EntryRenamed, {
 		from_path = from_path,
 		to_path = to_path,
 	})
@@ -39,7 +39,7 @@ end
 ---@param from_path string
 ---@param to_path string
 function M.dispatch_entry_will_rename(from_path, to_path)
-	api.event.dispatch(M.EntryWillRename, {
+	api.event.dispatch(M.Event.EntryWillRename, {
 		from_path = from_path,
 		to_path = to_path,
 	})
