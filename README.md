@@ -121,6 +121,8 @@ The following highlight values are used in the `sfm-fs` extension:
 Here's an example of how you might use the API provided by the `sfm` plugin in your own extension or configuration file:
 
 ```lua
+local sfm_fs_event = require("sfm.extensions.sfm-fs.event")
+
 sfm_explorer:subscribe(sfm_fs_event.Event.EntryCreated, function(payload)
   -- handle the event here
   print("New entry created: " .. payload)
