@@ -1,5 +1,6 @@
 local api = require("sfm.api")
 
+local event = require("sfm.extensions.sfm-fs.event")
 local ctx = require("sfm.extensions.sfm-fs.context")
 local input = require("sfm.extensions.sfm-fs.utils.input")
 local fs = require("sfm.extensions.sfm-fs.utils.fs")
@@ -20,6 +21,9 @@ function M.delete()
 		else
 			api.log.error("Deletion of file " .. entry.name .. " failed due to an error.")
 		end
+
+		-- dispatch an event
+		event.dispatch_entry_deleted(entry.path)
 
 		-- reload the explorer
 		api.explorer.reload()
@@ -61,6 +65,8 @@ function M.create()
 		end
 
 		if ok then
+			-- dispatch an event
+			event.dispatch_entry_created(fpath)
 			-- reload the explorer
 			api.explorer.reload()
 			-- focus file
@@ -96,6 +102,8 @@ function M.delete_selections()
 		for _, fpath in ipairs(paths) do
 			if fs.rm(fpath) then
 				success_count = success_count + 1
+				-- dispatch an event
+				event.dispatch_entry_deleted(fpath)
 			end
 		end
 
@@ -125,9 +133,25 @@ end
 ---@param from_paths table
 ---@param to_dir string
 ---@param action_fn function
-local function _paste(from_paths, to_dir, action_fn)
+---@param before_action_fn function?
+---@param on_action_success_fn function?
+local function _paste(from_paths, to_dir, action_fn, before_action_fn, on_action_success_fn)
 	local success_count = 0
 	local continue_processing = true
+
+	local function perform_action_fn(fpath, dest_path)
+		if before_action_fn ~= nil then
+			before_action_fn(fpath, dest_path)
+		end
+
+		if action_fn(fpath, dest_path) then
+			success_count = success_count + 1
+
+			if on_action_success_fn ~= nil then
+				on_action_success_fn(fpath, dest_path)
+			end
+		end
+	end
 
 	for _, fpath in ipairs(from_paths) do
 		local basename = api.path.basename(fpath)
@@ -151,9 +175,7 @@ local function _paste(from_paths, to_dir, action_fn)
 						return
 					end
 
-					if action_fn(fpath, dest_path) then
-						success_count = success_count + 1
-					end
+					perform_action_fn(fpath, dest_path)
 				end)
 			end, function()
 				-- on no
@@ -164,9 +186,7 @@ local function _paste(from_paths, to_dir, action_fn)
 				continue_processing = false
 			end)
 		else
-			if action_fn(fpath, dest_path) then
-				success_count = success_count + 1
-			end
+			perform_action_fn(fpath, dest_path)
 		end
 
 		if not continue_processing then
@@ -204,11 +224,15 @@ function M.move()
 			return
 		end
 
+		event.dispatch_entry_will_rename(from_path, to_path)
+
 		if fs.mv(from_path, to_path) then
 			-- reload the explorer
 			api.explorer.reload()
 			-- focus file
 			api.navigation.focus(to_path)
+			-- dispatch an event
+			event.dispatch_entry_renamed(from_path, to_path)
 
 			api.log.info(string.format("Moving file/directory %s ➜ %s complete", from_path, to_path))
 		else
@@ -245,6 +269,8 @@ function M.copy()
 			api.explorer.reload()
 			-- focus file
 			api.navigation.focus(to_path)
+			-- dispatch an event
+			event.dispatch_entry_created(to_path)
 
 			api.log.info(string.format("Copying file/directory %s ➜ %s complete", from_path, to_path))
 		else
@@ -274,7 +300,10 @@ function M.copy_selections()
 		dest_entry = dest_entry.parent
 	end
 
-	_paste(paths, dest_entry.path, fs.cp)
+	_paste(paths, dest_entry.path, fs.cp, nil, function(_, to_path)
+		-- dispatch an event
+		event.dispatch_entry_created(to_path)
+	end)
 
 	ctx.clear_selections()
 	api.explorer.reload()
@@ -300,7 +329,11 @@ function M.move_selections()
 		dest_entry = dest_entry.parent
 	end
 
-	_paste(paths, dest_entry.path, fs.mv)
+	_paste(paths, dest_entry.path, fs.mv, function(from_path, to_path)
+		event.dispatch_entry_will_rename(from_path, to_path)
+	end, function(from_path, to_path)
+		event.dispatch_entry_renamed(from_path, to_path)
+	end)
 
 	ctx.clear_selections()
 	api.explorer.reload()
