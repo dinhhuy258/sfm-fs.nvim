@@ -5,10 +5,14 @@ local colors = require("sfm.extensions.sfm-fs.colors")
 local selection_renderer = require("sfm.extensions.sfm-fs.selection_renderer")
 local ctx = require("sfm.extensions.sfm-fs.context")
 local actions = require("sfm.extensions.sfm-fs.actions")
+local api = require("sfm.api")
 
 local M = {}
 
 function M.setup(sfm_explorer, opts)
+  -- deprecated
+  api.log.warn("sfm-fs is deprecated, please use builtin fs functionalities in sfm instead")
+
 	config.setup(opts)
 	colors.setup()
 	actions.setup()
